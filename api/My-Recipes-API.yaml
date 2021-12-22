@@ -1,0 +1,93 @@
+swagger: "2.0"
+info:
+  title: Recipes Manager API
+  description: |
+    Recipes Manager API provides an interface to do management operations regarding recipes, such as list them, save 
+    new ones or update and delete an existing one.
+  version: 0.1.0
+  contact:
+    email: carlosjfcasero@gmail.com
+  license:
+    name: MIT
+    url: 'http://opensource.org/licenses/MIT'
+tags:
+  - name: Card
+    description: Payment card
+host: api.ing.com
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /recipes:
+    get:
+      summary: Endpoint to list all recipes
+      description: "List all recipes"
+      operationId: list-all-recipes
+      tags:
+        - read
+      responses:
+        '200':
+          description: OK - The recipe list has been sucessfully retrieved
+          schema:
+            $ref: '#/definitions/recipeBase'
+        '500':
+          description: Internal Server Error - Something went wrong on the server, check status site and/or report the issue. There's no need to really specify this any further (other than 503 below) as the client is powerless in fixing the condition that caused the error
+          schema:
+            $ref: '#/definitions/error'
+        '503':
+          description: Service Unavailable - The API is temporarily unavailable. This is the only 500 code that allows for the client to try and remedy the condition (i.e. by retrying)
+          schema:
+            $ref: '#/definitions/error'
+definitions:
+  recipesManagerError:
+    type: object
+    properties:
+      error:
+        type: object
+        $ref: '#/definitions/error'
+  errorBase:
+    type: object
+    required:
+      - code
+      - message
+      - severity
+    properties:
+      code:
+        type: string
+        example: ERROR.CODE
+      message:
+        type: string
+        example: Error message
+      severity:
+        type: string
+        enum:
+          - critical
+          - error
+          - warning
+          - info
+      source:
+        type: string
+      target:
+        type: string
+  error:
+    allOf:
+      - $ref: '#/definitions/errorBase'
+      - type: object
+        properties:
+          innerErrors:
+            type: array
+            items:
+              $ref: '#/definitions/errorBase'
+  recipeBase:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: string
+      name:
+        type: string

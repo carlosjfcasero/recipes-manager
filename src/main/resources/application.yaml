@@ -1,0 +1,13 @@
+management:
+#  TODO: enable only needed endpoints
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  server:
+    port: 8081
+server:
+  port: 8080
+
+
+
