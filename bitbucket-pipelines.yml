@@ -1,0 +1,89 @@
+clone:
+  depth: full
+
+image: maven:3.8.4-jdk-11
+
+pipelines:
+  branches:
+    develop:
+      - step:
+          name: Compile project
+          services:
+            - docker
+          script:
+            - echo Build from develop branch detected. Generating milestone version...
+            - baseVersion=$(mvn -q build-helper:parse-version -Dexec.executable=echo -Dexec.args='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' --non-recursive exec:exec)
+            - echo Base version detected: $baseVersion
+            - tags=($(git tag -n $baseVersion-M* --format="%(refname:strip=2)"))
+            - echo Git tags found with current base version $baseVersion: ${tags[*]}
+            - >
+              if [ ${#tags[@]} == 0 ]
+              then
+                echo No git tags found for base version $baseVersion, setting $baseVersion-M1...
+                milestoneVersion=1
+              else
+                echo Git tags found for base version $baseVersion. Calculating new milestone version...
+                IFS=$'\n'
+                latestMilestoneVersion=$(echo "${tags[*]}" | sort -t "M" -k 2 -gr | head -n1)
+                echo Latest milestone version found: $latestMilestoneVersion
+              
+                latestMilestoneVersionNumber=$(printf "%s\n" "${latestMilestoneVersion##*-M}")
+                milestoneVersion=$((latestMilestoneVersionNumber + 1))
+              fi
+
+            - buildVersion=$baseVersion-M$milestoneVersion
+            - echo $buildVersion > buildVersion.txt
+
+            # Compile project
+            - mvn clean install --no-transfer-progress
+
+            # Workaround for updating docker client version
+            - curl -s -O https://download.docker.com/linux/static/stable/x86_64/docker-20.10.9.tgz
+            - tar --extract --file=docker-20.10.9.tgz
+            - ls -al ./docker
+            - export PATH=./docker:$PATH
+            - which docker
+            - docker version
+
+            # Build and push docker image
+            - docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
+            - ARTIFACT_ID=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+            - docker build -t carlosjfcasero/${ARTIFACT_ID}:${buildVersion} --platform linux/amd64 --platform linux/arm64 --platform linux/arm/v7 .
+            - docker push carlosjfcasero/${ARTIFACT_ID}:${buildVersion}
+            - docker logout
+
+            # Create git tag
+            - git tag ${buildVersion}
+            - git push origin ${buildVersion}
+  pull-requests:
+    '**':
+      - step:
+          name: Build project and push docker image
+          services:
+            - docker
+          script:
+            - projectVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)
+            - buildVersion="$projectVersion-$BITBUCKET_BUILD_NUMBER"
+
+            # Compile project
+            - mvn clean install --no-transfer-progress
+
+            # Workaround for updating docker client version
+            - curl -s -O https://download.docker.com/linux/static/stable/x86_64/docker-20.10.9.tgz
+            - tar --extract --file=docker-20.10.9.tgz
+            - ls -al ./docker
+            - export PATH=./docker:$PATH
+            - which docker
+            - docker version
+
+            # Build and push docker image
+            - docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
+            - ARTIFACT_ID=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+            - docker build -t carlosjfcasero/${ARTIFACT_ID}:${buildVersion} --platform linux/amd64 --platform linux/arm64 --platform linux/arm/v7 .
+            - docker push carlosjfcasero/${ARTIFACT_ID}:${buildVersion}
+            - docker logout
+
+definitions:
+  services:
+    docker:
+      memory: 2048

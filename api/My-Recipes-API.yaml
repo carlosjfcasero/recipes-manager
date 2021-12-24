@@ -10,10 +10,8 @@ info:
   license:
     name: MIT
     url: 'http://opensource.org/licenses/MIT'
-tags:
-  - name: Card
-    description: Payment card
-host: api.ing.com
+host: cjfc.ignorelist.com
+basePath: /recipes-manager
 schemes:
   - https
 consumes:
@@ -21,11 +19,11 @@ consumes:
 produces:
   - application/json
 paths:
-  /recipes:
+  /v1/recipes:
     get:
-      summary: Endpoint to list all recipes
-      description: "List all recipes"
-      operationId: list-all-recipes
+      summary: Endpoint to list recipes
+      description: "List all recipes showing id and name"
+      operationId: list-recipes
       tags:
         - read
       responses:
@@ -36,19 +34,19 @@ paths:
         '500':
           description: Internal Server Error - Something went wrong on the server, check status site and/or report the issue. There's no need to really specify this any further (other than 503 below) as the client is powerless in fixing the condition that caused the error
           schema:
-            $ref: '#/definitions/error'
+            $ref: '#/definitions/recipesManagerError'
         '503':
           description: Service Unavailable - The API is temporarily unavailable. This is the only 500 code that allows for the client to try and remedy the condition (i.e. by retrying)
           schema:
-            $ref: '#/definitions/error'
+            $ref: '#/definitions/recipesManagerError'
 definitions:
   recipesManagerError:
     type: object
     properties:
       error:
         type: object
-        $ref: '#/definitions/error'
-  errorBase:
+        $ref: '#/definitions/errorDetails'
+  errorDetails:
     type: object
     required:
       - code
@@ -68,19 +66,6 @@ definitions:
           - error
           - warning
           - info
-      source:
-        type: string
-      target:
-        type: string
-  error:
-    allOf:
-      - $ref: '#/definitions/errorBase'
-      - type: object
-        properties:
-          innerErrors:
-            type: array
-            items:
-              $ref: '#/definitions/errorBase'
   recipeBase:
     type: object
     required:

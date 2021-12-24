@@ -1,4 +1,4 @@
-package com.ing.es.cardservicing.presentation.resource
+package com.cjfc.recipesmanager.presentation.resource
 
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

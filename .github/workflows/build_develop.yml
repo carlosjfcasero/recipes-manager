@@ -1,0 +1,77 @@
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Build project
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Calculate docker image name and tag
+        run: |
+          baseVersion=$(mvn -q build-helper:parse-version -Dexec.executable=echo -Dexec.args='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' --non-recursive exec:exec)
+          echo Base version detected: $baseVersion
+          tags=($(git tag -n $baseVersion-M* --format="%(refname:strip=2)"))
+          echo Git tags found with current base version $baseVersion: ${tags[*]}
+          if [ ${#tags[@]} == 0 ]
+          then
+              echo No git tags found for base version $baseVersion, setting $baseVersion-M1...
+              milestoneVersion=1
+          else
+              echo Git tags found for base version $baseVersion. Calculating new milestone version...
+              IFS=$'\n'
+              latestMilestoneVersion=$(echo "${tags[*]}" | sort -t "M" -k 2 -gr | head -n1)
+              echo Latest milestone version found: $latestMilestoneVersion
+
+              latestMilestoneVersionNumber=$(printf "%s\n" "${latestMilestoneVersion##*-M}")
+              milestoneVersion=$((latestMilestoneVersionNumber + 1))
+          fi
+          buildVersion=$baseVersion-M$milestoneVersion
+          artifactId=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+          echo "buildVersion=$buildVersion" >> $GITHUB_ENV
+          echo "artifactId=$artifactId" >> $GITHUB_ENV
+
+      - name: Upgrade pom version
+        run: mvn build-helper:parse-version versions:set -DnewVersion=$buildVersion
+
+      - name: Build with Maven
+        run: mvn clean install --no-transfer-progress
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push docker image
+        run: |
+          docker build -t carlosjfcasero/${{ env.artifactId }}:${{ env.buildVersion }} --platform linux/amd64,linux/arm64,linux/arm/v7 --push .
+
+      - name: Create git tag
+        run: |
+          git tag ${buildVersion}
+          git push origin ${buildVersion}
+          
+          
+          
+          
+          
+          - echo Build from develop branch detected. Generating milestone version...
+                      
