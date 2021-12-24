@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  recipes-manager:
+    image: carlosjfcasero/recipes-manager:latest
+    environment:
+      spring.cloud.gcp.credentials.location: "file:/application/service-account/firebase-service-account.json"
+    ports:
+      - "8443:8443"
+      - "8444:8444"
+    volumes:
+      - "${PATH_TO_FIREBASE_SERVICE_ACCOUNT}:/application/service-account"
