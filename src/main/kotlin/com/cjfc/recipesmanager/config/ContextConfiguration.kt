@@ -12,7 +12,7 @@ class ContextConfiguration {
     @Bean
     fun corsWebFilter(): CorsWebFilter? {
         val corsConfig = CorsConfiguration()
-        corsConfig.allowedOrigins = listOf("http://localhost:3000")
+        corsConfig.allowedOriginPatterns = listOf("*192.168.1.*:[*]", "*localhost:[*]")
         corsConfig.maxAge = 8000L
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", corsConfig)

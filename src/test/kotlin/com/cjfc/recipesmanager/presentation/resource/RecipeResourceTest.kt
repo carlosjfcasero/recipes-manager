@@ -1,9 +1,9 @@
 package com.cjfc.recipesmanager.presentation.resource
 
-import com.cjfc.recipesmanager.domain.BaseRecipe
+import com.cjfc.recipesmanager.domain.Recipe
 import com.cjfc.recipesmanager.mapper.RecipeMapper
-import com.cjfc.recipesmanager.presentation.payload.BaseRecipePayload
-import com.cjfc.recipesmanager.presentation.payload.BaseRecipesPayload
+import com.cjfc.recipesmanager.presentation.payload.RecipePayload
+import com.cjfc.recipesmanager.presentation.payload.RecipesPayload
 import com.cjfc.recipesmanager.service.RecipeService
 import com.cjfc.recipesmanager.utils.TestUtils
 import org.junit.jupiter.api.Test
@@ -35,28 +35,28 @@ class RecipeResourceTest {
     @Test
     fun whenCallGetRecipes_thenSuccess() {
         // GIVEN
-        val baseRecipe1 = podamFactory.manufacturePojoWithFullData(BaseRecipe::class.java)
-        val baseRecipe2 = podamFactory.manufacturePojoWithFullData(BaseRecipe::class.java)
-        val baseRecipeList = listOf(baseRecipe1, baseRecipe2)
-        val baseRecipePayload1 = podamFactory.manufacturePojoWithFullData(BaseRecipePayload::class.java)
-        val baseRecipePayload2 = podamFactory.manufacturePojoWithFullData(BaseRecipePayload::class.java)
-        val baseRecipesPayload = BaseRecipesPayload(listOf(baseRecipePayload1, baseRecipePayload2))
+        val recipe1 = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+        val recipe2 = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+        val recipeList = listOf(recipe1, recipe2)
+        val recipePayload1 = podamFactory.manufacturePojoWithFullData(RecipePayload::class.java)
+        val recipePayload2 = podamFactory.manufacturePojoWithFullData(RecipePayload::class.java)
+        val recipesPayload = RecipesPayload(listOf(recipePayload1, recipePayload2))
 
         `when`(recipeService.getRecipes())
-            .thenReturn(Flux.fromIterable(baseRecipeList))
-        `when`(recipeMapper.toPayload(baseRecipe1))
-            .thenReturn(baseRecipePayload1)
-        `when`(recipeMapper.toPayload(baseRecipe2))
-            .thenReturn(baseRecipePayload2)
+            .thenReturn(Flux.fromIterable(recipeList))
+        `when`(recipeMapper.toPayload(recipe1))
+            .thenReturn(recipePayload1)
+        `when`(recipeMapper.toPayload(recipe2))
+            .thenReturn(recipePayload2)
 
         // WHEN - THEN
         StepVerifier.create(underTest.getRecipes())
-            .expectNextMatches(baseRecipesPayload::equals)
+            .expectNextMatches(recipesPayload::equals)
             .verifyComplete()
 
         verify(recipeService).getRecipes()
-        verify(recipeMapper).toPayload(baseRecipe1)
-        verify(recipeMapper).toPayload(baseRecipe2)
+        verify(recipeMapper).toPayload(recipe1)
+        verify(recipeMapper).toPayload(recipe2)
     }
 
     @Test
