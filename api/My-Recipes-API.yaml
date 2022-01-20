@@ -30,7 +30,7 @@ paths:
         '200':
           description: OK - The recipe list has been sucessfully retrieved
           schema:
-            $ref: '#/definitions/recipeBase'
+            $ref: '#/definitions/recipes'
         '500':
           description: Internal Server Error - Something went wrong on the server, check status site and/or report the issue. There's no need to really specify this any further (other than 503 below) as the client is powerless in fixing the condition that caused the error
           schema:
@@ -66,13 +66,33 @@ definitions:
           - error
           - warning
           - info
-  recipeBase:
+  recipe:
     type: object
-    required:
-      - id
-      - name
     properties:
       id:
         type: string
       name:
         type: string
+      description:
+        type: string
+      favourite:
+        type: boolean
+      ingredients:
+        type: string
+      origin:
+        type: string
+      temperature:
+        type: string
+      course:
+        type: string
+      labels:
+        type: array
+        items:
+          type: string
+  recipes:
+    type: object
+    properties:
+      recipes:
+        type: array
+        items:
+          $ref: '#/definitions/recipe'

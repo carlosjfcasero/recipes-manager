@@ -1,8 +1,8 @@
 package com.cjfc.recipesmanager.mapper
 
-import com.cjfc.recipesmanager.domain.BaseRecipe
-import com.cjfc.recipesmanager.dto.BaseRecipeDto
-import com.cjfc.recipesmanager.presentation.payload.BaseRecipePayload
+import com.cjfc.recipesmanager.domain.Recipe
+import com.cjfc.recipesmanager.presentation.payload.RecipePayload
+import com.cjfc.recipesmanager.repository.dto.RecipeDto
 import org.mapstruct.Mapper
 import org.mapstruct.ReportingPolicy.ERROR
 
@@ -10,20 +10,18 @@ import org.mapstruct.ReportingPolicy.ERROR
 interface RecipeMapper {
 
     /**
-     * Transform [BaseRecipe] to [BaseRecipePayload].
+     * Transform [Recipe] to [RecipePayload].
      *
-     * @param baseRecipe source
-     * @return RecipeBasePayload
+     * @param recipe source
+     * @return RecipePayload
      */
-//    @Mapping(target = "copy", ignore = true)
-    fun toPayload(baseRecipe: BaseRecipe): BaseRecipePayload
+    fun toPayload(recipe: Recipe): RecipePayload
 
     /**
-     * Transform [BaseRecipeDto] to [BaseRecipe].
+     * Transform [RecipeDto] to [Recipe].
      *
-     * @param baseRecipeDto source
-     * @return RecipeBase
+     * @param recipeDto source
+     * @return Recipe
      */
-//    @Mapping(target = "copy", ignore = true)
-    fun toEntity(baseRecipeDto: BaseRecipeDto): BaseRecipe
+    fun toEntity(recipeDto: RecipeDto): Recipe
 }

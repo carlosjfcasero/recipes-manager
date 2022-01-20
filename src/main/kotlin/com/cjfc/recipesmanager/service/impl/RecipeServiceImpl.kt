@@ -1,6 +1,6 @@
 package com.cjfc.recipesmanager.service.impl
 
-import com.cjfc.recipesmanager.domain.BaseRecipe
+import com.cjfc.recipesmanager.domain.Recipe
 import com.cjfc.recipesmanager.domain.error.ErrorType.GENERIC_ERROR
 import com.cjfc.recipesmanager.domain.error.RecipesManagerException
 import com.cjfc.recipesmanager.mapper.RecipeMapper
@@ -18,12 +18,12 @@ class RecipeServiceImpl(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    override fun getRecipes(): Flux<BaseRecipe> {
+    override fun getRecipes(): Flux<Recipe> {
         log.info("Fetching all recipes")
         return firestoreRepository.findAll()
-            .doOnComplete { log.info("Recipes base DTO fetched successfully") }
+            .doOnComplete { log.info("Recipes DTO fetched successfully") }
             .map { recipeMapper.toEntity(it) }
-            .doOnComplete { log.info("Recipes base fetched successfully") }
+            .doOnComplete { log.info("Recipes fetched successfully") }
             .doOnError { log.error("Error while fetching recipes from repository", it) }
             .onErrorMap {
                 RecipesManagerException(

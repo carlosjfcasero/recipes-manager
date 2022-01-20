@@ -1,0 +1,30 @@
+## For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+#
+#name: Build project
+#
+#on:
+#  push:
+#    branches: [ main ]
+#
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+##    Mergear a develop:
+##
+##      - El pom se queda igual
+##      - El changelog no se toca
+##      - Nueva imagen de docker, con MXXX y pushear imagen
+##      - Pushear tag
+##
+##
+##    Mergear a main:
+##
+##      - Actualizar changelog
+##      - Quitar 'SNAPSHOT' de la versión del pom
+##      - Commitear y pushear a main
+##      - Construir
+##      - Nueva imagen de docker, con MXXX y pushear imagen
+##      - Pushear tag
+##      - Subir versión del pom
+##      - Crear nueva entrada en el changelog
+##      - Commitear y pushear a main

@@ -10,3 +10,4 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - Project initialization: Create endpoint to retrieve all recipes
+- Modify recipes endpoint to retrieve whole recipe details list
