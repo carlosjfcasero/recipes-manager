@@ -1,8 +1,8 @@
 package com.cjfc.recipesmanager.mapper
 
-import com.cjfc.recipesmanager.domain.BaseRecipe
-import com.cjfc.recipesmanager.dto.BaseRecipeDto
-import com.cjfc.recipesmanager.presentation.payload.BaseRecipePayload
+import com.cjfc.recipesmanager.domain.Recipe
+import com.cjfc.recipesmanager.presentation.payload.RecipePayload
+import com.cjfc.recipesmanager.repository.dto.RecipeDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -18,32 +18,53 @@ class RecipeMapperTest {
     private val underTest: RecipeMapper = Mappers.getMapper(RecipeMapper::class.java)
 
     @Test
-    fun givenBaseRecipe_whenMapToPayload_thenSuccess() {
+    fun givenRecipe_whenMapToPayload_thenSuccess() {
         // GIVEN
-        val baseRecipe = podamFactory.manufacturePojoWithFullData(BaseRecipe::class.java)
-        val expectedBaseRecipePayload = BaseRecipePayload(id = baseRecipe.id, name = baseRecipe.name)
+        val recipe = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+        val expectedRecipePayload =
+            RecipePayload(
+                id = recipe.id,
+                name = recipe.name,
+                description = recipe.description,
+                course = recipe.course,
+                favourite = recipe.favourite,
+                ingredients = recipe.ingredients,
+                labels = recipe.labels,
+                origin = recipe.origin,
+                temperature = recipe.temperature
+            )
 
         // WHEN
-        val result = underTest.toPayload(baseRecipe)
+        val result = underTest.toPayload(recipe)
 
         // THEN
         assertThat(result)
             .usingRecursiveComparison()
-            .isEqualTo(expectedBaseRecipePayload)
+            .isEqualTo(expectedRecipePayload)
     }
 
     @Test
-    fun givenBaseRecipeDto_whenMapToEntity_thenSuccess() {
+    fun givenRecipeDto_whenMapToEntity_thenSuccess() {
         // GIVEN
-        val baseRecipeDto = podamFactory.manufacturePojoWithFullData(BaseRecipeDto::class.java)
-        val expectedBaseRecipe = BaseRecipe(id = baseRecipeDto.id, name = baseRecipeDto.name)
+        val recipeDto = podamFactory.manufacturePojoWithFullData(RecipeDto::class.java)
+        val expectedRecipe = Recipe(
+            id = recipeDto.id,
+            name = recipeDto.name,
+            description = recipeDto.description,
+            course = recipeDto.course,
+            favourite = recipeDto.favourite,
+            ingredients = recipeDto.ingredients,
+            labels = recipeDto.labels,
+            origin = recipeDto.origin,
+            temperature = recipeDto.temperature
+        )
 
         // WHEN
-        val result = underTest.toEntity(baseRecipeDto)
+        val result = underTest.toEntity(recipeDto)
 
         // THEN
         assertThat(result)
             .usingRecursiveComparison()
-            .isEqualTo(expectedBaseRecipe)
+            .isEqualTo(expectedRecipe)
     }
 }

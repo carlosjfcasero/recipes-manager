@@ -1,9 +1,9 @@
 package com.cjfc.recipesmanager.service.impl
 
-import com.cjfc.recipesmanager.domain.BaseRecipe
+import com.cjfc.recipesmanager.domain.Recipe
 import com.cjfc.recipesmanager.domain.error.ErrorType.GENERIC_ERROR
 import com.cjfc.recipesmanager.domain.error.RecipesManagerException
-import com.cjfc.recipesmanager.dto.BaseRecipeDto
+import com.cjfc.recipesmanager.repository.dto.RecipeDto
 import com.cjfc.recipesmanager.mapper.RecipeMapper
 import com.cjfc.recipesmanager.repository.FirestoreRepository
 import com.cjfc.recipesmanager.utils.TestUtils
@@ -36,28 +36,28 @@ internal class RecipeServiceImplTest {
     @Test
     fun whenCallGetRecipes_thenSuccess() {
         // GIVEN
-        val baseRecipeDto1 = podamFactory.manufacturePojoWithFullData(BaseRecipeDto::class.java)
-        val baseRecipeDto2 = podamFactory.manufacturePojoWithFullData(BaseRecipeDto::class.java)
-        val baseRecipeDtoList = listOf(baseRecipeDto1, baseRecipeDto2)
-        val baseRecipe1 = podamFactory.manufacturePojoWithFullData(BaseRecipe::class.java)
-        val baseRecipe2 = podamFactory.manufacturePojoWithFullData(BaseRecipe::class.java)
+        val recipeDto1 = podamFactory.manufacturePojoWithFullData(RecipeDto::class.java)
+        val recipeDto2 = podamFactory.manufacturePojoWithFullData(RecipeDto::class.java)
+        val recipeDtoList = listOf(recipeDto1, recipeDto2)
+        val recipe1 = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+        val recipe2 = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
 
         `when`(firestoreRepository.findAll())
-            .thenReturn(Flux.fromIterable(baseRecipeDtoList))
-        `when`(recipeMapper.toEntity(baseRecipeDto1))
-            .thenReturn(baseRecipe1)
-        `when`(recipeMapper.toEntity(baseRecipeDto2))
-            .thenReturn(baseRecipe2)
+            .thenReturn(Flux.fromIterable(recipeDtoList))
+        `when`(recipeMapper.toEntity(recipeDto1))
+            .thenReturn(recipe1)
+        `when`(recipeMapper.toEntity(recipeDto2))
+            .thenReturn(recipe2)
 
         // WHEN - THEN
         StepVerifier.create(underTest.getRecipes())
-            .expectNextMatches { it.equals(baseRecipe1) }
-            .expectNextMatches { it.equals(baseRecipe2) }
+            .expectNextMatches { it.equals(recipe1) }
+            .expectNextMatches { it.equals(recipe2) }
             .verifyComplete()
 
         verify(firestoreRepository).findAll()
-        verify(recipeMapper).toEntity(baseRecipeDto1)
-        verify(recipeMapper).toEntity(baseRecipeDto2)
+        verify(recipeMapper).toEntity(recipeDto1)
+        verify(recipeMapper).toEntity(recipeDto2)
     }
 
     @Test
