@@ -68,10 +68,3 @@ jobs:
         run: |
           git tag ${buildVersion}
           git push origin ${buildVersion}
-          
-          
-          
-          
-          
-          - echo Build from develop branch detected. Generating milestone version...
-                      
