@@ -3,10 +3,10 @@ package com.cjfc.recipesmanager.service.impl
 import com.cjfc.recipesmanager.domain.Recipe
 import com.cjfc.recipesmanager.domain.error.ErrorType.GENERIC_ERROR
 import com.cjfc.recipesmanager.domain.error.RecipesManagerException
-import com.cjfc.recipesmanager.repository.dto.RecipeDto
 import com.cjfc.recipesmanager.mapper.RecipeMapper
 import com.cjfc.recipesmanager.repository.FirestoreRepository
-import com.cjfc.recipesmanager.utils.TestUtils
+import com.cjfc.recipesmanager.repository.dto.RecipeDto
+import com.cjfc.recipesmanager.utils.TestUtils.Companion.createRandomRecipesManagerException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -15,6 +15,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import uk.co.jemos.podam.api.PodamFactory
 import uk.co.jemos.podam.api.PodamFactoryImpl
@@ -63,7 +64,7 @@ internal class RecipeServiceImplTest {
     @Test
     fun whenCallGetRecipesAndErrorCallingRepository_thenSuccess() {
         // GIVEN
-        val randomRecipesManagerException = TestUtils.createRandomRecipesManagerException()
+        val randomRecipesManagerException = createRandomRecipesManagerException()
         val expectedRecipesManagerException = RecipesManagerException(
             message = "Error fetching recipes from repository",
             cause = randomRecipesManagerException,
@@ -83,5 +84,58 @@ internal class RecipeServiceImplTest {
             }
 
         verify(firestoreRepository).findAll()
+    }
+
+    @Test
+    fun givenARecipe_whenCallCreateRecipe_thenSuccess() {
+        // GIVEN
+        val recipe = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+        val recipeDto = podamFactory.manufacturePojoWithFullData(RecipeDto::class.java)
+
+        `when`(recipeMapper.toDto(recipe))
+            .thenReturn(recipeDto)
+        `when`(firestoreRepository.save(recipeDto))
+            .thenReturn(Mono.just(recipeDto))
+        `when`(recipeMapper.toEntity(recipeDto))
+            .thenReturn(recipe)
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.createRecipe(recipe))
+            .expectNextMatches(recipe::equals)
+            .verifyComplete()
+
+        verify(recipeMapper).toDto(recipe)
+        verify(firestoreRepository).save(recipeDto)
+        verify(recipeMapper).toEntity(recipeDto)
+    }
+
+    @Test
+    fun givenARecipe_whenCallCreateRecipeAndErrorCallingRepository_thenFail() {
+        // GIVEN
+        val recipe = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+        val recipeDto = podamFactory.manufacturePojoWithFullData(RecipeDto::class.java)
+        val randomRecipesManagerException = createRandomRecipesManagerException()
+        val expectedRecipesManagerException = RecipesManagerException(
+            message = "Error creating new recipe",
+            cause = randomRecipesManagerException,
+            errorType = GENERIC_ERROR
+        )
+
+        `when`(recipeMapper.toDto(recipe))
+            .thenReturn(recipeDto)
+        `when`(firestoreRepository.save(recipeDto))
+            .thenReturn(Mono.error(randomRecipesManagerException))
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.createRecipe(recipe))
+            .verifyErrorMatches { exception ->
+                val recipesManagerException = exception as RecipesManagerException
+                recipesManagerException.message == expectedRecipesManagerException.message
+                        && recipesManagerException.cause == expectedRecipesManagerException.cause
+                        && recipesManagerException.errorType == expectedRecipesManagerException.errorType
+            }
+
+        verify(recipeMapper).toDto(recipe)
+        verify(firestoreRepository).save(recipeDto)
     }
 }

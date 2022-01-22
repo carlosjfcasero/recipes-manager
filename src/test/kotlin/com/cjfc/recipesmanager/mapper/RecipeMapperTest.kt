@@ -67,4 +67,56 @@ class RecipeMapperTest {
             .usingRecursiveComparison()
             .isEqualTo(expectedRecipe)
     }
+
+    @Test
+    fun givenRecipePayload_whenMapToEntity_thenSuccess() {
+        // GIVEN
+        val recipePayload = podamFactory.manufacturePojoWithFullData(RecipePayload::class.java)
+        val expectedRecipe = Recipe(
+            id = recipePayload.id,
+            name = recipePayload.name,
+            description = recipePayload.description,
+            course = recipePayload.course,
+            favourite = recipePayload.favourite,
+            ingredients = recipePayload.ingredients,
+            labels = recipePayload.labels,
+            origin = recipePayload.origin,
+            temperature = recipePayload.temperature
+        )
+
+        // WHEN
+        val result = underTest.toEntity(recipePayload)
+
+        // THEN
+        assertThat(result)
+            .hasFieldOrPropertyWithValue("id", null)
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(expectedRecipe)
+    }
+
+    @Test
+    fun givenRecipe_whenMapToDto_thenSuccess() {
+        // GIVEN
+        val recipe = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+        val expectedRecipeDto = RecipeDto(
+            id = recipe.id,
+            name = recipe.name,
+            description = recipe.description,
+            course = recipe.course,
+            favourite = recipe.favourite,
+            ingredients = recipe.ingredients,
+            labels = recipe.labels,
+            origin = recipe.origin,
+            temperature = recipe.temperature
+        )
+
+        // WHEN
+        val result = underTest.toDto(recipe)
+
+        // THEN
+        assertThat(result)
+            .usingRecursiveComparison()
+            .isEqualTo(expectedRecipeDto)
+    }
 }
