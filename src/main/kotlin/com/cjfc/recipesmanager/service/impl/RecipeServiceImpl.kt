@@ -9,6 +9,7 @@ import com.cjfc.recipesmanager.service.RecipeService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @Service
 class RecipeServiceImpl(
@@ -28,6 +29,21 @@ class RecipeServiceImpl(
             .onErrorMap {
                 RecipesManagerException(
                     message = "Error fetching recipes from repository",
+                    cause = it,
+                    errorType = GENERIC_ERROR
+                )
+            }
+    }
+
+    override fun createRecipe(recipe: Recipe): Mono<Recipe> {
+        log.info("Creating new recipe")
+        return firestoreRepository.save(recipeMapper.toDto(recipe))
+            .doOnSuccess { log.info("New recipe created successfully") }
+            .doOnError { log.error("Error while creating new recipe", it) }
+            .map { recipeMapper.toEntity(it) }
+            .onErrorMap {
+                RecipesManagerException(
+                    message = "Error creating new recipe",
                     cause = it,
                     errorType = GENERIC_ERROR
                 )
