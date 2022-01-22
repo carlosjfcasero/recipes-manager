@@ -39,9 +39,30 @@ paths:
           description: Service Unavailable - The API is temporarily unavailable. This is the only 500 code that allows for the client to try and remedy the condition (i.e. by retrying)
           schema:
             $ref: '#/definitions/recipesManagerError'
+    post:
+      summary: Endpoint to create a new recipe
+      description: "Create a new recipe with the provided details"
+      operationId: create-recipe
+      tags:
+        - create
+      responses:
+        '200':
+          description: OK - The recipe has been sucessfully created
+          schema:
+            $ref: '#/definitions/recipe'
+        '500':
+          description: Internal Server Error - Something went wrong on the server, check status site and/or report the issue. There's no need to really specify this any further (other than 503 below) as the client is powerless in fixing the condition that caused the error
+          schema:
+            $ref: '#/definitions/recipesManagerError'
+        '503':
+          description: Service Unavailable - The API is temporarily unavailable. This is the only 500 code that allows for the client to try and remedy the condition (i.e. by retrying)
+          schema:
+            $ref: '#/definitions/recipesManagerError'
 definitions:
   recipesManagerError:
     type: object
+    required:
+      - error
     properties:
       error:
         type: object
@@ -91,6 +112,8 @@ definitions:
           type: string
   recipes:
     type: object
+    required:
+      - recipes
     properties:
       recipes:
         type: array

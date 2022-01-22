@@ -5,7 +5,7 @@ import com.cjfc.recipesmanager.mapper.RecipeMapper
 import com.cjfc.recipesmanager.presentation.payload.RecipePayload
 import com.cjfc.recipesmanager.presentation.payload.RecipesPayload
 import com.cjfc.recipesmanager.service.RecipeService
-import com.cjfc.recipesmanager.utils.TestUtils
+import com.cjfc.recipesmanager.utils.TestUtils.Companion.createRandomRecipesManagerException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -14,6 +14,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import uk.co.jemos.podam.api.PodamFactory
 import uk.co.jemos.podam.api.PodamFactoryImpl
@@ -62,7 +63,7 @@ class RecipeResourceTest {
     @Test
     fun whenCallGetRecipesAndErrorCallingService_thenFail() {
         // GIVEN
-        val randomRecipesManagerException = TestUtils.createRandomRecipesManagerException()
+        val randomRecipesManagerException = createRandomRecipesManagerException()
 
         `when`(recipeService.getRecipes())
             .thenReturn(Flux.error(randomRecipesManagerException))
@@ -72,5 +73,48 @@ class RecipeResourceTest {
             .verifyErrorMatches(randomRecipesManagerException::equals)
 
         verify(recipeService).getRecipes()
+    }
+
+    @Test
+    fun givenARecipe_whenCallCreateRecipe_thenSuccess() {
+        // GIVEN
+        val recipePayload = podamFactory.manufacturePojoWithFullData(RecipePayload::class.java)
+        val recipe = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+
+        `when`(recipeMapper.toEntity(recipePayload))
+            .thenReturn(recipe)
+        `when`(recipeService.createRecipe(recipe))
+            .thenReturn(Mono.just(recipe))
+        `when`(recipeMapper.toPayload(recipe))
+            .thenReturn(recipePayload)
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.createRecipe(recipePayload))
+            .expectNextMatches(recipePayload::equals)
+            .verifyComplete()
+
+        verify(recipeMapper).toEntity(recipePayload)
+        verify(recipeService).createRecipe(recipe)
+        verify(recipeMapper).toPayload(recipe)
+    }
+
+    @Test
+    fun givenARecipe_whenCallCreateRecipeAndErrorCallingService_thenFail() {
+        // GIVEN
+        val recipePayload = podamFactory.manufacturePojoWithFullData(RecipePayload::class.java)
+        val recipe = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+        val randomRecipesManagerException = createRandomRecipesManagerException()
+
+        `when`(recipeMapper.toEntity(recipePayload))
+            .thenReturn(recipe)
+        `when`(recipeService.createRecipe(recipe))
+            .thenReturn(Mono.error(randomRecipesManagerException))
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.createRecipe(recipePayload))
+            .verifyErrorMatches(randomRecipesManagerException::equals)
+
+        verify(recipeMapper).toEntity(recipePayload)
+        verify(recipeService).createRecipe(recipe)
     }
 }

@@ -1,11 +1,13 @@
 package com.cjfc.recipesmanager.presentation.resource
 
 import com.cjfc.recipesmanager.mapper.RecipeMapper
+import com.cjfc.recipesmanager.presentation.payload.RecipePayload
 import com.cjfc.recipesmanager.presentation.payload.RecipesPayload
 import com.cjfc.recipesmanager.service.RecipeService
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
@@ -28,7 +30,18 @@ class RecipeResource(
             .map { recipeMapper.toPayload(it) }
             .collectList()
             .map { RecipesPayload(it) }
-            .doOnSuccess { log.info("Recipes  fetched successfully") }
+            .doOnSuccess { log.info("Recipes fetched successfully") }
             .doOnError { log.error("Error while fetching recipes", it) }
+    }
+
+    @ResponseBody
+    @PostMapping("/v1/recipes")
+    fun createRecipe(@RequestBody recipePayload: RecipePayload): Mono<RecipePayload> {
+        log.info("POST - /v1/recipes - Creating new recipe")
+
+        return recipeService.createRecipe(recipeMapper.toEntity(recipePayload))
+            .map { recipeMapper.toPayload(it) }
+            .doOnSuccess { log.info("New recipe created successfully") }
+            .doOnError { log.error("Error while creating recipe", it) }
     }
 }
