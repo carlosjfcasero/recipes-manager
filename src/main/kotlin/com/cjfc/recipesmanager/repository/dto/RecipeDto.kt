@@ -16,5 +16,6 @@ data class RecipeDto(
     val origin: String?,
     val temperature: String?,
     val labels: List<String>?,
+    val tags: List<String>?,
     val course: String?
 )
