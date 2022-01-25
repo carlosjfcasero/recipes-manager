@@ -8,6 +8,6 @@ data class Recipe(
     val ingredients: String?,
     val origin: String?,
     val temperature: String?,
-    val labels: List<String>?,
+    val tags: List<String>?,
     val course: String?
 )

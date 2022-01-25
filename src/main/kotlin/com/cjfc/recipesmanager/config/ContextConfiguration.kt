@@ -13,6 +13,8 @@ class ContextConfiguration {
     fun corsWebFilter(): CorsWebFilter? {
         val corsConfig = CorsConfiguration()
         corsConfig.allowedOriginPatterns = listOf("*192.168.1.*:[*]", "*localhost:[*]")
+        corsConfig.allowedMethods = listOf("GET", "POST", "PATCH")
+        corsConfig.allowedHeaders = listOf("*")
         corsConfig.maxAge = 8000L
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", corsConfig)

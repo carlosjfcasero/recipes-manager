@@ -29,7 +29,7 @@ class RecipeMapperTest {
                 course = recipe.course,
                 favourite = recipe.favourite,
                 ingredients = recipe.ingredients,
-                labels = recipe.labels,
+                tags = recipe.tags,
                 origin = recipe.origin,
                 temperature = recipe.temperature
             )
@@ -47,6 +47,9 @@ class RecipeMapperTest {
     fun givenRecipeDto_whenMapToEntity_thenSuccess() {
         // GIVEN
         val recipeDto = podamFactory.manufacturePojoWithFullData(RecipeDto::class.java)
+        val tags = ArrayList<String>()
+        tags.addAll(recipeDto.tags!!)
+        tags.addAll(recipeDto.labels!!)
         val expectedRecipe = Recipe(
             id = recipeDto.id,
             name = recipeDto.name,
@@ -54,7 +57,7 @@ class RecipeMapperTest {
             course = recipeDto.course,
             favourite = recipeDto.favourite,
             ingredients = recipeDto.ingredients,
-            labels = recipeDto.labels,
+            tags = tags,
             origin = recipeDto.origin,
             temperature = recipeDto.temperature
         )
@@ -79,7 +82,7 @@ class RecipeMapperTest {
             course = recipePayload.course,
             favourite = recipePayload.favourite,
             ingredients = recipePayload.ingredients,
-            labels = recipePayload.labels,
+            tags = recipePayload.tags,
             origin = recipePayload.origin,
             temperature = recipePayload.temperature
         )
@@ -106,9 +109,10 @@ class RecipeMapperTest {
             course = recipe.course,
             favourite = recipe.favourite,
             ingredients = recipe.ingredients,
-            labels = recipe.labels,
+            tags = recipe.tags,
             origin = recipe.origin,
-            temperature = recipe.temperature
+            temperature = recipe.temperature,
+            labels = null
         )
 
         // WHEN
