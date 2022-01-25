@@ -106,7 +106,7 @@ definitions:
         type: string
       course:
         type: string
-      labels:
+      tags:
         type: array
         items:
           type: string

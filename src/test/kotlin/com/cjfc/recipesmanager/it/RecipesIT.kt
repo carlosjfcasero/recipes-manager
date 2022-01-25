@@ -48,8 +48,8 @@ class RecipesIT {
             origin = randomAlphanumeric(5),
             temperature = randomAlphanumeric(5),
             labels = listOf(randomAlphanumeric(5), randomAlphanumeric(5)),
+            tags = listOf(randomAlphanumeric(5), randomAlphanumeric(5)),
             course = randomAlphanumeric(5)
-
         )
         val recipeDto2 = RecipeDto(
             id = randomAlphanumeric(5),
@@ -60,8 +60,8 @@ class RecipesIT {
             origin = randomAlphanumeric(5),
             temperature = randomAlphanumeric(5),
             labels = listOf(randomAlphanumeric(5), randomAlphanumeric(5)),
+            tags = listOf(randomAlphanumeric(5), randomAlphanumeric(5)),
             course = randomAlphanumeric(5)
-
         )
         val recipeDtoList = listOf(recipeDto1, recipeDto2)
 
@@ -83,8 +83,10 @@ class RecipesIT {
             .jsonPath("$.recipes[0].ingredients").isEqualTo(recipeDto1.ingredients!!)
             .jsonPath("$.recipes[0].origin").isEqualTo(recipeDto1.origin!!)
             .jsonPath("$.recipes[0].temperature").isEqualTo(recipeDto1.temperature!!)
-            .jsonPath("$.recipes[0].labels[0]").isEqualTo(recipeDto1.labels!!.get(0))
-            .jsonPath("$.recipes[0].labels[1]").isEqualTo(recipeDto1.labels!!.get(1))
+            .jsonPath("$.recipes[0].tags[0]").isEqualTo(recipeDto1.tags!![0])
+            .jsonPath("$.recipes[0].tags[1]").isEqualTo(recipeDto1.tags!![1])
+            .jsonPath("$.recipes[0].tags[2]").isEqualTo(recipeDto1.labels!![0])
+            .jsonPath("$.recipes[0].tags[3]").isEqualTo(recipeDto1.labels!![1])
             .jsonPath("$.recipes[0].course").isEqualTo(recipeDto1.course!!)
             .jsonPath("$.recipes[1].id").isEqualTo(recipeDto2.id!!)
             .jsonPath("$.recipes[1].name").isEqualTo(recipeDto2.name!!)
@@ -93,8 +95,10 @@ class RecipesIT {
             .jsonPath("$.recipes[1].ingredients").isEqualTo(recipeDto2.ingredients!!)
             .jsonPath("$.recipes[1].origin").isEqualTo(recipeDto2.origin!!)
             .jsonPath("$.recipes[1].temperature").isEqualTo(recipeDto2.temperature!!)
-            .jsonPath("$.recipes[1].labels[0]").isEqualTo(recipeDto2.labels!!.get(0))
-            .jsonPath("$.recipes[1].labels[1]").isEqualTo(recipeDto2.labels!!.get(1))
+            .jsonPath("$.recipes[1].tags[0]").isEqualTo(recipeDto2.tags!![0])
+            .jsonPath("$.recipes[1].tags[1]").isEqualTo(recipeDto2.tags!![1])
+            .jsonPath("$.recipes[1].tags[2]").isEqualTo(recipeDto2.labels!![0])
+            .jsonPath("$.recipes[1].tags[3]").isEqualTo(recipeDto2.labels!![1])
             .jsonPath("$.recipes[1].course").isEqualTo(recipeDto2.course!!)
 
         verify(firestoreRepository).findAll()
@@ -136,7 +140,7 @@ class RecipesIT {
             .put("ingredients", randomAlphanumeric(5))
             .put("origin", randomAlphanumeric(5))
             .put("temperature", randomAlphanumeric(5))
-            .put("labels", labelsJsonArray)
+            .put("tags", labelsJsonArray)
             .put("course", randomAlphanumeric(5))
 
         val recipeDto = RecipeDto(
@@ -147,7 +151,8 @@ class RecipesIT {
             ingredients = recipePayload.getString("ingredients"),
             origin = recipePayload.getString("origin"),
             temperature = recipePayload.getString("temperature"),
-            labels = listOf(labelsJsonArray.getString(0), labelsJsonArray.getString(1)),
+            tags = listOf(labelsJsonArray.getString(0), labelsJsonArray.getString(1)),
+            labels = null,
             course = recipePayload.getString("course")
         )
 
@@ -171,8 +176,8 @@ class RecipesIT {
             .jsonPath("$.ingredients").isEqualTo(recipeDto.ingredients!!)
             .jsonPath("$.origin").isEqualTo(recipeDto.origin!!)
             .jsonPath("$.temperature").isEqualTo(recipeDto.temperature!!)
-            .jsonPath("$.labels[0]").isEqualTo(recipeDto.labels!!.get(0))
-            .jsonPath("$.labels[1]").isEqualTo(recipeDto.labels!!.get(1))
+            .jsonPath("$.tags[0]").isEqualTo(recipeDto.tags!![0])
+            .jsonPath("$.tags[1]").isEqualTo(recipeDto.tags!![1])
             .jsonPath("$.course").isEqualTo(recipeDto.course!!)
 
         verify(firestoreRepository).save(recipeDto)
@@ -193,7 +198,7 @@ class RecipesIT {
             .put("ingredients", randomAlphanumeric(5))
             .put("origin", randomAlphanumeric(5))
             .put("temperature", randomAlphanumeric(5))
-            .put("labels", labelsJsonArray)
+            .put("tags", labelsJsonArray)
             .put("course", randomAlphanumeric(5))
 
         val recipeDto = RecipeDto(
@@ -204,7 +209,8 @@ class RecipesIT {
             ingredients = recipePayload.getString("ingredients"),
             origin = recipePayload.getString("origin"),
             temperature = recipePayload.getString("temperature"),
-            labels = listOf(labelsJsonArray.getString(0), labelsJsonArray.getString(1)),
+            tags = listOf(labelsJsonArray.getString(0), labelsJsonArray.getString(1)),
+            labels = null,
             course = recipePayload.getString("course")
         )
 
