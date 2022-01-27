@@ -28,6 +28,7 @@ class RecipesIT {
 
     companion object {
         const val RECIPES_PATH = "/recipes-manager/v1/recipes"
+        const val TIME = "10:23"
     }
 
     @MockBean
@@ -49,7 +50,9 @@ class RecipesIT {
             temperature = randomAlphanumeric(5),
             labels = listOf(randomAlphanumeric(5), randomAlphanumeric(5)),
             tags = listOf(randomAlphanumeric(5), randomAlphanumeric(5)),
-            course = randomAlphanumeric(5)
+            course = randomAlphanumeric(5),
+            url = randomAlphanumeric(5),
+            time = TIME
         )
         val recipeDto2 = RecipeDto(
             id = randomAlphanumeric(5),
@@ -61,7 +64,9 @@ class RecipesIT {
             temperature = randomAlphanumeric(5),
             labels = listOf(randomAlphanumeric(5), randomAlphanumeric(5)),
             tags = listOf(randomAlphanumeric(5), randomAlphanumeric(5)),
-            course = randomAlphanumeric(5)
+            course = randomAlphanumeric(5),
+            url = randomAlphanumeric(5),
+            time = TIME
         )
         val recipeDtoList = listOf(recipeDto1, recipeDto2)
 
@@ -88,6 +93,8 @@ class RecipesIT {
             .jsonPath("$.recipes[0].tags[2]").isEqualTo(recipeDto1.labels!![0])
             .jsonPath("$.recipes[0].tags[3]").isEqualTo(recipeDto1.labels!![1])
             .jsonPath("$.recipes[0].course").isEqualTo(recipeDto1.course!!)
+            .jsonPath("$.recipes[0].url").isEqualTo(recipeDto1.url!!)
+            .jsonPath("$.recipes[0].time").isEqualTo(recipeDto1.time!!)
             .jsonPath("$.recipes[1].id").isEqualTo(recipeDto2.id!!)
             .jsonPath("$.recipes[1].name").isEqualTo(recipeDto2.name!!)
             .jsonPath("$.recipes[1].description").isEqualTo(recipeDto2.description!!)
@@ -100,6 +107,8 @@ class RecipesIT {
             .jsonPath("$.recipes[1].tags[2]").isEqualTo(recipeDto2.labels!![0])
             .jsonPath("$.recipes[1].tags[3]").isEqualTo(recipeDto2.labels!![1])
             .jsonPath("$.recipes[1].course").isEqualTo(recipeDto2.course!!)
+            .jsonPath("$.recipes[1].url").isEqualTo(recipeDto2.url!!)
+            .jsonPath("$.recipes[1].time").isEqualTo(recipeDto2.time!!)
 
         verify(firestoreRepository).findAll()
     }
@@ -142,6 +151,8 @@ class RecipesIT {
             .put("temperature", randomAlphanumeric(5))
             .put("tags", labelsJsonArray)
             .put("course", randomAlphanumeric(5))
+            .put("url", randomAlphanumeric(5))
+            .put("time", TIME)
 
         val recipeDto = RecipeDto(
             id = null,
@@ -153,7 +164,9 @@ class RecipesIT {
             temperature = recipePayload.getString("temperature"),
             tags = listOf(labelsJsonArray.getString(0), labelsJsonArray.getString(1)),
             labels = null,
-            course = recipePayload.getString("course")
+            course = recipePayload.getString("course"),
+            url = recipePayload.getString("url"),
+            time = recipePayload.getString("time")
         )
 
         `when`(firestoreRepository.save(recipeDto))
@@ -179,6 +192,8 @@ class RecipesIT {
             .jsonPath("$.tags[0]").isEqualTo(recipeDto.tags!![0])
             .jsonPath("$.tags[1]").isEqualTo(recipeDto.tags!![1])
             .jsonPath("$.course").isEqualTo(recipeDto.course!!)
+            .jsonPath("$.url").isEqualTo(recipeDto.url!!)
+            .jsonPath("$.time").isEqualTo(recipeDto.time!!)
 
         verify(firestoreRepository).save(recipeDto)
     }
@@ -200,6 +215,8 @@ class RecipesIT {
             .put("temperature", randomAlphanumeric(5))
             .put("tags", labelsJsonArray)
             .put("course", randomAlphanumeric(5))
+            .put("url", randomAlphanumeric(5))
+            .put("time", TIME)
 
         val recipeDto = RecipeDto(
             id = null,
@@ -211,7 +228,9 @@ class RecipesIT {
             temperature = recipePayload.getString("temperature"),
             tags = listOf(labelsJsonArray.getString(0), labelsJsonArray.getString(1)),
             labels = null,
-            course = recipePayload.getString("course")
+            course = recipePayload.getString("course"),
+            url = recipePayload.getString("url"),
+            time = recipePayload.getString("time")
         )
 
         `when`(firestoreRepository.save(recipeDto))

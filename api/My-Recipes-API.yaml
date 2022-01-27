@@ -110,6 +110,12 @@ definitions:
         type: array
         items:
           type: string
+      url:
+        type: string
+      time:
+        type: string
+        format: time
+        example: 'HH:mm'
   recipes:
     type: object
     required:
