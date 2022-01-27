@@ -3,6 +3,10 @@ package com.cjfc.recipesmanager.mapper
 import com.cjfc.recipesmanager.domain.Recipe
 import com.cjfc.recipesmanager.presentation.payload.RecipePayload
 import com.cjfc.recipesmanager.repository.dto.RecipeDto
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import java.util.Optional
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -14,6 +18,11 @@ import uk.co.jemos.podam.api.PodamFactoryImpl
 @ExtendWith(MockitoExtension::class)
 class RecipeMapperTest {
 
+    companion object {
+        private const val TIME = "10:23"
+        private val DATE_FORMATTER = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())!!
+    }
+
     private val podamFactory: PodamFactory = PodamFactoryImpl()
     private val underTest: RecipeMapper = Mappers.getMapper(RecipeMapper::class.java)
 
@@ -21,18 +30,19 @@ class RecipeMapperTest {
     fun givenRecipe_whenMapToPayload_thenSuccess() {
         // GIVEN
         val recipe = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
-        val expectedRecipePayload =
-            RecipePayload(
-                id = recipe.id,
-                name = recipe.name,
-                description = recipe.description,
-                course = recipe.course,
-                favourite = recipe.favourite,
-                ingredients = recipe.ingredients,
-                tags = recipe.tags,
-                origin = recipe.origin,
-                temperature = recipe.temperature
-            )
+        val expectedRecipePayload = RecipePayload(
+            id = recipe.id,
+            name = recipe.name,
+            description = recipe.description,
+            course = recipe.course,
+            favourite = recipe.favourite,
+            ingredients = recipe.ingredients,
+            tags = recipe.tags,
+            origin = recipe.origin,
+            temperature = recipe.temperature,
+            url = recipe.url,
+            time = recipe.time
+        )
 
         // WHEN
         val result = underTest.toPayload(recipe)
@@ -47,6 +57,10 @@ class RecipeMapperTest {
     fun givenRecipeDto_whenMapToEntity_thenSuccess() {
         // GIVEN
         val recipeDto = podamFactory.manufacturePojoWithFullData(RecipeDto::class.java)
+            .copy(time = TIME)
+        val recipeDtoTime = Optional.ofNullable(recipeDto.time)
+            .map { LocalTime.parse(it, DATE_FORMATTER) }
+            .orElseGet { null }
         val tags = ArrayList<String>()
         tags.addAll(recipeDto.tags!!)
         tags.addAll(recipeDto.labels!!)
@@ -59,7 +73,9 @@ class RecipeMapperTest {
             ingredients = recipeDto.ingredients,
             tags = tags,
             origin = recipeDto.origin,
-            temperature = recipeDto.temperature
+            temperature = recipeDto.temperature,
+            url = recipeDto.url,
+            time = recipeDtoTime
         )
 
         // WHEN
@@ -84,7 +100,9 @@ class RecipeMapperTest {
             ingredients = recipePayload.ingredients,
             tags = recipePayload.tags,
             origin = recipePayload.origin,
-            temperature = recipePayload.temperature
+            temperature = recipePayload.temperature,
+            url = recipePayload.url,
+            time = recipePayload.time
         )
 
         // WHEN
@@ -112,7 +130,9 @@ class RecipeMapperTest {
             tags = recipe.tags,
             origin = recipe.origin,
             temperature = recipe.temperature,
-            labels = null
+            labels = null,
+            url = recipe.url,
+            time = recipe.time?.format(DATE_FORMATTER)
         )
 
         // WHEN
