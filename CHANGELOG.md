@@ -13,3 +13,4 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Modify recipes endpoint to retrieve whole recipe details list
 - Create endpoint to add new recipe
 - Accept both tags and labels parameters in DTO from firebase
+- Retrieve/accept time and url params

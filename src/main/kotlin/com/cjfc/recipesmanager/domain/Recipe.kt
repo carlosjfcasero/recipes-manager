@@ -1,5 +1,7 @@
 package com.cjfc.recipesmanager.domain
 
+import java.time.LocalTime
+
 data class Recipe(
     val id: String?,
     val name: String?,
@@ -9,5 +11,7 @@ data class Recipe(
     val origin: String?,
     val temperature: String?,
     val tags: List<String>?,
-    val course: String?
+    val course: String?,
+    val url: String?,
+    val time: LocalTime?
 )

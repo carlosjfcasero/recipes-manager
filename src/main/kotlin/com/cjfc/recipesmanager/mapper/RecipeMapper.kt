@@ -5,6 +5,7 @@ import com.cjfc.recipesmanager.presentation.payload.RecipePayload
 import com.cjfc.recipesmanager.repository.dto.RecipeDto
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
+import org.mapstruct.Mappings
 import org.mapstruct.Named
 import org.mapstruct.ReportingPolicy.ERROR
 
@@ -44,7 +45,10 @@ interface RecipeMapper {
      * @param recipe source
      * @return RecipeDto
      */
-    @Mapping(target = "labels", ignore = true)
+    @Mappings(
+        Mapping(target = "labels", ignore = true),
+        Mapping(source = "time", target = "time", dateFormat = "HH:mm"),
+    )
     fun toDto(recipe: Recipe): RecipeDto
 
     companion object {
