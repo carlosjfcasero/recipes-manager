@@ -12,7 +12,8 @@ class ContextConfiguration {
     @Bean
     fun corsWebFilter(): CorsWebFilter? {
         val corsConfig = CorsConfiguration()
-        corsConfig.allowedOriginPatterns = listOf("*192.168.1.*:[*]", "*localhost:[*]")
+        //TODO: specify port
+        corsConfig.allowedOriginPatterns = listOf("*192.168.1.*:[*]", "*localhost:[*]", "*cjfc.ignorelist.com:[*]")
         corsConfig.allowedMethods = listOf("GET", "POST", "PATCH")
         corsConfig.allowedHeaders = listOf("*")
         corsConfig.maxAge = 8000L

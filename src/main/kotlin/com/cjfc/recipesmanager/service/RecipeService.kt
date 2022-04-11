@@ -15,6 +15,13 @@ interface RecipeService {
     fun getRecipes(): Flux<Recipe>
 
     /**
+     * Retrieves the recipe that belongs to the provided recipe id.
+     *
+     * @return a Mono with the [Recipe] or with a [RecipesManagerException] if error
+     */
+    fun getRecipeById(recipeId: String): Mono<Recipe>
+
+    /**
      * Add new recipe.
      *
      * @return a Mono with the created [Recipe] or with a [RecipesManagerException] if error
