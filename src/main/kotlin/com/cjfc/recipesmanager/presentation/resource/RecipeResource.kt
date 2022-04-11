@@ -6,6 +6,7 @@ import com.cjfc.recipesmanager.presentation.payload.RecipesPayload
 import com.cjfc.recipesmanager.service.RecipeService
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -23,25 +24,33 @@ class RecipeResource(
 
     @ResponseBody
     @GetMapping("/v1/recipes")
-    fun getRecipes(): Mono<RecipesPayload> {
+    fun getRecipes(): Mono<RecipesPayload> =
         log.info("GET - /v1/recipes - Fetching all recipes")
-
-        return recipeService.getRecipes()
+            .let { recipeService.getRecipes() }
             .map { recipeMapper.toPayload(it) }
             .collectList()
             .map { RecipesPayload(it) }
             .doOnSuccess { log.info("Recipes fetched successfully") }
             .doOnError { log.error("Error while fetching recipes", it) }
-    }
+
 
     @ResponseBody
     @PostMapping("/v1/recipes")
-    fun createRecipe(@RequestBody recipePayload: RecipePayload): Mono<RecipePayload> {
+    fun createRecipe(@RequestBody recipePayload: RecipePayload): Mono<RecipePayload> =
         log.info("POST - /v1/recipes - Creating new recipe")
-
-        return recipeService.createRecipe(recipeMapper.toEntity(recipePayload))
+            .let { recipeMapper.toEntity(recipePayload) }
+            .let { recipeService.createRecipe(it) }
             .map { recipeMapper.toPayload(it) }
             .doOnSuccess { log.info("New recipe created successfully") }
             .doOnError { log.error("Error while creating recipe", it) }
-    }
+
+
+    @ResponseBody
+    @GetMapping("/v1/recipes/{recipeId}")
+    fun getRecipeById(@PathVariable recipeId: String): Mono<RecipePayload> =
+        log.info("GET - /v1/recipes/{} - Getting recipe by id", recipeId)
+            .let { recipeService.getRecipeById(recipeId) }
+            .map { recipeMapper.toPayload(it) }
+            .doOnSuccess { log.info("New recipe created successfully") }
+            .doOnError { log.error("Error while creating recipe", it) }
 }

@@ -23,6 +23,10 @@ import uk.co.jemos.podam.api.PodamFactoryImpl
 @ExtendWith(MockitoExtension::class)
 internal class RecipeServiceImplTest {
 
+    companion object {
+        private const val RECIPE_ID = "RECIPE_ID"
+    }
+
     @Mock
     lateinit var firestoreRepository: FirestoreRepository
 
@@ -84,6 +88,51 @@ internal class RecipeServiceImplTest {
             }
 
         verify(firestoreRepository).findAll()
+    }
+
+    @Test
+    fun givenARecipeId_whenCallGetRecipeById_thenSuccess() {
+        // GIVEN
+        val recipeDto = podamFactory.manufacturePojoWithFullData(RecipeDto::class.java)
+        val recipe = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+
+        `when`(firestoreRepository.findById(RECIPE_ID))
+            .thenReturn(Mono.just(recipeDto))
+        `when`(recipeMapper.toEntity(recipeDto))
+            .thenReturn(recipe)
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.getRecipeById(RECIPE_ID))
+            .expectNextMatches { it.equals(recipe) }
+            .verifyComplete()
+
+        verify(firestoreRepository).findById(RECIPE_ID)
+        verify(recipeMapper).toEntity(recipeDto)
+    }
+
+    @Test
+    fun givenARecipeId_whenCallGetRecipeByIdAndErrorCallingRepository_thenFail() {
+        // GIVEN
+        val randomRecipesManagerException = createRandomRecipesManagerException()
+        val expectedRecipesManagerException = RecipesManagerException(
+            message = "Error fetching recipe from repository",
+            cause = randomRecipesManagerException,
+            errorType = GENERIC_ERROR
+        )
+
+        `when`(firestoreRepository.findById(RECIPE_ID))
+            .thenReturn(Mono.error(randomRecipesManagerException))
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.getRecipeById(RECIPE_ID))
+            .verifyErrorMatches { exception ->
+                val recipesManagerException = exception as RecipesManagerException
+                recipesManagerException.message == expectedRecipesManagerException.message
+                        && recipesManagerException.cause == expectedRecipesManagerException.cause
+                        && recipesManagerException.errorType == expectedRecipesManagerException.errorType
+            }
+
+        verify(firestoreRepository).findById(RECIPE_ID)
     }
 
     @Test

@@ -22,6 +22,10 @@ import uk.co.jemos.podam.api.PodamFactoryImpl
 @ExtendWith(MockitoExtension::class)
 class RecipeResourceTest {
 
+    companion object {
+        private const val RECIPE_ID = "RECIPE_ID"
+    }
+
     @Mock
     lateinit var recipeService: RecipeService
 
@@ -73,6 +77,41 @@ class RecipeResourceTest {
             .verifyErrorMatches(randomRecipesManagerException::equals)
 
         verify(recipeService).getRecipes()
+    }
+
+    @Test
+    fun givenARecipeId_whenCallGetRecipeById_thenSuccess() {
+        // GIVEN
+        val recipe = podamFactory.manufacturePojoWithFullData(Recipe::class.java)
+        val recipePayload = podamFactory.manufacturePojoWithFullData(RecipePayload::class.java)
+
+        `when`(recipeService.getRecipeById(RECIPE_ID))
+            .thenReturn(Mono.just(recipe))
+        `when`(recipeMapper.toPayload(recipe))
+            .thenReturn(recipePayload)
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.getRecipeById(RECIPE_ID))
+            .expectNextMatches(recipePayload::equals)
+            .verifyComplete()
+
+        verify(recipeService).getRecipeById(RECIPE_ID)
+        verify(recipeMapper).toPayload(recipe)
+    }
+
+    @Test
+    fun givenARecipeId_whenCallGetRecipeByIdAndErrorCallingService_thenFail() {
+        // GIVEN
+        val randomRecipesManagerException = createRandomRecipesManagerException()
+
+        `when`(recipeService.getRecipeById(RECIPE_ID))
+            .thenReturn(Mono.error(randomRecipesManagerException))
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.getRecipeById(RECIPE_ID))
+            .verifyErrorMatches(randomRecipesManagerException::equals)
+
+        verify(recipeService).getRecipeById(RECIPE_ID)
     }
 
     @Test
