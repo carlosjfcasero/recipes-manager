@@ -10,4 +10,6 @@ interface FirestoreRepository : FirestoreReactiveRepository<RecipeDto> {
     override fun findAll(): Flux<RecipeDto>
 
     override fun <S : RecipeDto> save(entity: S): Mono<S>
+
+    override fun findById(id: String): Mono<RecipeDto>
 }

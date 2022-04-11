@@ -8,27 +8,22 @@ import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-@ExtendWith(SpringExtension::class)
-@SpringBootTest(properties = ["spring.cloud.gcp.firestore.enabled=false"])
-@AutoConfigureWebTestClient
-class RecipesIT {
+class RecipesIT : BaseIT() {
 
     companion object {
         const val RECIPES_PATH = "/recipes-manager/v1/recipes"
+        const val GET_RECIPE_BY_ID_PATH = "/recipes-manager/v1/recipes/{recipeId}"
         const val TIME = "10:23"
+        const val RECIPE_ID = "RECIPE_ID"
     }
 
     @MockBean
@@ -38,7 +33,7 @@ class RecipesIT {
     private lateinit var webClient: WebTestClient
 
     @Test
-    fun whenGetRecipes_thenSuccess() {
+    fun `should return a list of recipes`() {
         // GIVEN
         val recipeDto1 = RecipeDto(
             id = randomAlphanumeric(5),
@@ -114,7 +109,7 @@ class RecipesIT {
     }
 
     @Test
-    fun whenGetRecipesAndErrorCallingFirestore_thenError() {
+    fun `should fail the find all recipes when firestore repository returns error`() {
         // GIVEN
         `when`(firestoreRepository.findAll())
             .thenReturn(Flux.error(Exception()))
@@ -135,7 +130,7 @@ class RecipesIT {
     }
 
     @Test
-    fun givenARecipe_whenCreateNewRecipe_thenSuccess() {
+    fun `should create new recipe`() {
         // GIVEN
         val labelsJsonArray = JSONArray()
             .put(randomAlphanumeric(5))
@@ -199,7 +194,7 @@ class RecipesIT {
     }
 
     @Test
-    fun givenARecipe_whenCreateNewRecipeAndErrorCallingFirestore_thenError() {
+    fun `should fail the create new recipe when firestore repository returns error`() {
         // GIVEN
         val labelsJsonArray = JSONArray()
             .put(randomAlphanumeric(5))
@@ -251,5 +246,73 @@ class RecipesIT {
             .jsonPath("$.error.severity").isEqualTo(GENERIC_ERROR.severity.toString())
 
         verify(firestoreRepository).save(recipeDto)
+    }
+
+    @Test
+    fun `should return a recipe by id`() {
+        // GIVEN
+        val recipeDto = RecipeDto(
+            id = randomAlphanumeric(5),
+            name = randomAlphanumeric(5),
+            description = randomAlphanumeric(5),
+            favourite = Random.nextBoolean(),
+            ingredients = randomAlphanumeric(5),
+            origin = randomAlphanumeric(5),
+            temperature = randomAlphanumeric(5),
+            labels = listOf(randomAlphanumeric(5), randomAlphanumeric(5)),
+            tags = listOf(randomAlphanumeric(5), randomAlphanumeric(5)),
+            course = randomAlphanumeric(5),
+            url = randomAlphanumeric(5),
+            time = TIME
+        )
+
+        `when`(firestoreRepository.findById(RECIPE_ID))
+            .thenReturn(Mono.just(recipeDto))
+
+        // WHEN-THEN
+        webClient
+            .get()
+            .uri(buildPath(GET_RECIPE_BY_ID_PATH, RECIPE_ID))
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody()
+            .jsonPath("$.id").isEqualTo(recipeDto.id!!)
+            .jsonPath("$.name").isEqualTo(recipeDto.name!!)
+            .jsonPath("$.description").isEqualTo(recipeDto.description!!)
+            .jsonPath("$.favourite").isEqualTo(recipeDto.favourite!!)
+            .jsonPath("$.ingredients").isEqualTo(recipeDto.ingredients!!)
+            .jsonPath("$.origin").isEqualTo(recipeDto.origin!!)
+            .jsonPath("$.temperature").isEqualTo(recipeDto.temperature!!)
+            .jsonPath("$.tags[0]").isEqualTo(recipeDto.tags!![0])
+            .jsonPath("$.tags[1]").isEqualTo(recipeDto.tags!![1])
+            .jsonPath("$.tags[2]").isEqualTo(recipeDto.labels!![0])
+            .jsonPath("$.tags[3]").isEqualTo(recipeDto.labels!![1])
+            .jsonPath("$.course").isEqualTo(recipeDto.course!!)
+            .jsonPath("$.url").isEqualTo(recipeDto.url!!)
+            .jsonPath("$.time").isEqualTo(recipeDto.time!!)
+
+        verify(firestoreRepository).findById(RECIPE_ID)
+    }
+
+    @Test
+    fun `should fail the find recipe by id when firestore repository returns error`() {
+        // GIVEN
+        `when`(firestoreRepository.findById(RECIPE_ID))
+            .thenReturn(Mono.error(Exception()))
+
+        // WHEN-THEN
+        webClient
+            .get()
+            .uri(buildPath(GET_RECIPE_BY_ID_PATH, RECIPE_ID))
+            .exchange()
+            .expectStatus()
+            .is5xxServerError
+            .expectBody()
+            .jsonPath("$.error.code").isEqualTo(GENERIC_ERROR.code)
+            .jsonPath("$.error.message").isEqualTo(GENERIC_ERROR.message)
+            .jsonPath("$.error.severity").isEqualTo(GENERIC_ERROR.severity.toString())
+
+        verify(firestoreRepository).findById(RECIPE_ID)
     }
 }
