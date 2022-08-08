@@ -16,3 +16,4 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Retrieve/accept time and url params
 - Create endpoint to retrieve recipe by id
 - Configure CORS
+- Change branch strategy, migrate from develop branch to main
