@@ -2,6 +2,7 @@ package com.cjfc.recipesmanager.presentation.resource
 
 import com.cjfc.recipesmanager.domain.Recipe
 import com.cjfc.recipesmanager.mapper.RecipeMapper
+import com.cjfc.recipesmanager.presentation.payload.RecipeBasePayload
 import com.cjfc.recipesmanager.presentation.payload.RecipePayload
 import com.cjfc.recipesmanager.presentation.payload.RecipesPayload
 import com.cjfc.recipesmanager.service.RecipeService
@@ -10,8 +11,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -155,5 +156,36 @@ class RecipeResourceTest {
 
         verify(recipeMapper).toEntity(recipePayload)
         verify(recipeService).createRecipe(recipe)
+    }
+
+    @Test
+    fun givenARecipe_whenCallDeleteRecipe_thenSuccess() {
+        // GIVEN
+        val recipeBasePayload = RecipeBasePayload(id = RECIPE_ID)
+
+        `when`(recipeService.deleteRecipeById(RECIPE_ID))
+            .thenReturn(Mono.just(RECIPE_ID))
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.deleteRecipeById(RECIPE_ID))
+            .expectNextMatches(recipeBasePayload::equals)
+            .verifyComplete()
+
+        verify(recipeService).deleteRecipeById(RECIPE_ID)
+    }
+
+    @Test
+    fun givenARecipe_whenCallDeleteRecipeAndErrorCallingService_thenFail() {
+        // GIVEN
+        val randomRecipesManagerException = createRandomRecipesManagerException()
+
+        `when`(recipeService.deleteRecipeById(RECIPE_ID))
+            .thenReturn(Mono.error(randomRecipesManagerException))
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.deleteRecipeById(RECIPE_ID))
+            .verifyErrorMatches(randomRecipesManagerException::equals)
+
+        verify(recipeService).deleteRecipeById(RECIPE_ID)
     }
 }

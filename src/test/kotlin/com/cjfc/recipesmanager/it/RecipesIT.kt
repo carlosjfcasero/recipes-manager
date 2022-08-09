@@ -8,8 +8,8 @@ import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -21,7 +21,7 @@ class RecipesIT : BaseIT() {
 
     companion object {
         const val RECIPES_PATH = "/recipes-manager/v1/recipes"
-        const val GET_RECIPE_BY_ID_PATH = "/recipes-manager/v1/recipes/{recipeId}"
+        const val RECIPES_RECIPE_ID_PATH = "/recipes-manager/v1/recipes/{recipeId}"
         const val TIME = "10:23"
         const val RECIPE_ID = "RECIPE_ID"
     }
@@ -272,7 +272,7 @@ class RecipesIT : BaseIT() {
         // WHEN-THEN
         webClient
             .get()
-            .uri(buildPath(GET_RECIPE_BY_ID_PATH, RECIPE_ID))
+            .uri(buildPath(RECIPES_RECIPE_ID_PATH, RECIPE_ID))
             .exchange()
             .expectStatus()
             .isOk
@@ -304,7 +304,7 @@ class RecipesIT : BaseIT() {
         // WHEN-THEN
         webClient
             .get()
-            .uri(buildPath(GET_RECIPE_BY_ID_PATH, RECIPE_ID))
+            .uri(buildPath(RECIPES_RECIPE_ID_PATH, RECIPE_ID))
             .exchange()
             .expectStatus()
             .is5xxServerError
@@ -314,5 +314,45 @@ class RecipesIT : BaseIT() {
             .jsonPath("$.error.severity").isEqualTo(GENERIC_ERROR.severity.toString())
 
         verify(firestoreRepository).findById(RECIPE_ID)
+    }
+
+    @Test
+    fun `should delete recipe`() {
+        // GIVEN
+        `when`(firestoreRepository.deleteById(RECIPE_ID))
+            .thenReturn(Mono.empty())
+
+        // WHEN-THEN
+        webClient
+            .delete()
+            .uri(buildPath(RECIPES_RECIPE_ID_PATH, RECIPE_ID))
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody()
+            .jsonPath("$.id").isEqualTo(RECIPE_ID)
+
+        verify(firestoreRepository).deleteById(RECIPE_ID)
+    }
+
+    @Test
+    fun `should fail the delete recipe when firestore repository returns error`() {
+        // GIVEN
+        `when`(firestoreRepository.deleteById(RECIPE_ID))
+            .thenReturn(Mono.error(Exception()))
+
+        // WHEN-THEN
+        webClient
+            .delete()
+            .uri(buildPath(RECIPES_RECIPE_ID_PATH, RECIPE_ID))
+            .exchange()
+            .expectStatus()
+            .is5xxServerError
+            .expectBody()
+            .jsonPath("$.error.code").isEqualTo(GENERIC_ERROR.code)
+            .jsonPath("$.error.message").isEqualTo(GENERIC_ERROR.message)
+            .jsonPath("$.error.severity").isEqualTo(GENERIC_ERROR.severity.toString())
+
+        verify(firestoreRepository).deleteById(RECIPE_ID)
     }
 }

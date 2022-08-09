@@ -12,4 +12,6 @@ interface FirestoreRepository : FirestoreReactiveRepository<RecipeDto> {
     override fun <S : RecipeDto> save(entity: S): Mono<S>
 
     override fun findById(id: String): Mono<RecipeDto>
+
+    override fun deleteById(id: String): Mono<Void>
 }

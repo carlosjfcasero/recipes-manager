@@ -62,4 +62,17 @@ class RecipeServiceImpl(
                     errorType = GENERIC_ERROR
                 )
             }
+
+    override fun deleteRecipeById(id: String): Mono<String> =
+        log.info("Deleting recipe")
+            .let { firestoreRepository.deleteById(id).thenReturn(id) }
+            .doOnSuccess { log.info("Recipe deleted successfully") }
+            .doOnError { log.error("Error while deleting recipe", it) }
+            .onErrorMap {
+                RecipesManagerException(
+                    message = "Error deleting recipe",
+                    cause = it,
+                    errorType = GENERIC_ERROR
+                )
+            }
 }
