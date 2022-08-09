@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -186,5 +186,44 @@ internal class RecipeServiceImplTest {
 
         verify(recipeMapper).toDto(recipe)
         verify(firestoreRepository).save(recipeDto)
+    }
+
+    @Test
+    fun givenARecipe_whenCallDeleteRecipe_thenSuccess() {
+        // GIVEN
+        `when`(firestoreRepository.deleteById(RECIPE_ID))
+            .thenReturn(Mono.empty())
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.deleteRecipeById(RECIPE_ID))
+            .expectNextMatches(RECIPE_ID::equals)
+            .verifyComplete()
+
+        verify(firestoreRepository).deleteById(RECIPE_ID)
+    }
+
+    @Test
+    fun givenARecipe_whenCallDeleteRecipeAndErrorCallingRepository_thenFail() {
+        // GIVEN
+        val randomRecipesManagerException = createRandomRecipesManagerException()
+        val expectedRecipesManagerException = RecipesManagerException(
+            message = "Error deleting recipe",
+            cause = randomRecipesManagerException,
+            errorType = GENERIC_ERROR
+        )
+
+        `when`(firestoreRepository.deleteById(RECIPE_ID))
+            .thenReturn(Mono.error(randomRecipesManagerException))
+
+        // WHEN - THEN
+        StepVerifier.create(underTest.deleteRecipeById(RECIPE_ID))
+            .verifyErrorMatches { exception ->
+                val recipesManagerException = exception as RecipesManagerException
+                recipesManagerException.message == expectedRecipesManagerException.message
+                        && recipesManagerException.cause == expectedRecipesManagerException.cause
+                        && recipesManagerException.errorType == expectedRecipesManagerException.errorType
+            }
+
+        verify(firestoreRepository).deleteById(RECIPE_ID)
     }
 }

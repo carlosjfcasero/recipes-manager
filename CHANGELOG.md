@@ -17,3 +17,4 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Create endpoint to retrieve recipe by id
 - Configure CORS
 - Change branch strategy, migrate from develop branch to main
+- Create endpoint to delete recipe by id

@@ -27,4 +27,11 @@ interface RecipeService {
      * @return a Mono with the created [Recipe] or with a [RecipesManagerException] if error
      */
     fun createRecipe(recipe: Recipe): Mono<Recipe>
+
+    /**
+     * Deletes the recipe that belongs to the provided recipe id.
+     *
+     * @return a Mono with the id or with a [RecipesManagerException] if error
+     */
+    fun deleteRecipeById(id: String): Mono<String>
 }

@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.6.2</version>
+    <version>2.7.2</version>
     <relativePath/>
   </parent>
 
@@ -23,9 +23,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <kotlin.code.style>official</kotlin.code.style>
     <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
-    <!--    TODO: upgrade to 1.6.X-->
-    <!--    <kotlin.version>1.6.10</kotlin.version>-->
-    <kotlin.version>1.5.31</kotlin.version>
+    <kotlin.version>1.7.10</kotlin.version>
     <firebase-admin.version>8.1.0</firebase-admin.version>
     <spring-cloud-gcp.version>1.2.8.RELEASE</spring-cloud-gcp.version>
     <mapstruct.version>1.4.2.Final</mapstruct.version>

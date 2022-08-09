@@ -1,10 +1,12 @@
 package com.cjfc.recipesmanager.presentation.resource
 
 import com.cjfc.recipesmanager.mapper.RecipeMapper
+import com.cjfc.recipesmanager.presentation.payload.RecipeBasePayload
 import com.cjfc.recipesmanager.presentation.payload.RecipePayload
 import com.cjfc.recipesmanager.presentation.payload.RecipesPayload
 import com.cjfc.recipesmanager.service.RecipeService
 import org.slf4j.LoggerFactory
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -53,4 +55,13 @@ class RecipeResource(
             .map { recipeMapper.toPayload(it) }
             .doOnSuccess { log.info("New recipe created successfully") }
             .doOnError { log.error("Error while creating recipe", it) }
+
+    @ResponseBody
+    @DeleteMapping("/v1/recipes/{recipeId}")
+    fun deleteRecipeById(@PathVariable recipeId: String): Mono<RecipeBasePayload> =
+        log.info("DELETE - /v1/recipes/{} - Deleting recipe by id", recipeId)
+            .let { recipeService.deleteRecipeById(recipeId) }
+            .map { RecipeBasePayload(id = it) }
+            .doOnSuccess { log.info("Recipe deleted successfully") }
+            .doOnError { log.error("Error while deleting recipe", it) }
 }
